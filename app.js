@@ -8,6 +8,7 @@ const boolParser = require("express-query-boolean");
 const path = require("path");
 const { limiterAPI } = require("./helpers/constants");
 require("dotenv").config();
+
 const AVATAR_OF_USERS = process.env.AVATAR_OF_USERS;
 
 const app = express();
@@ -16,6 +17,9 @@ const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
 app.use(helmet());
 app.use(express.static(path.join(__dirname, AVATAR_OF_USERS)));
+
+app.use(express.static(process.env.UPLOAD_DIR));
+
 app.get("env") !== "test" && app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json({ limit: 10000 }));
@@ -23,6 +27,8 @@ app.use(boolParser());
 app.use("/api/", rateLimit(limiterAPI));
 
 app.use("/api/", require("./routes/api"));
+
+//app.use(express.static(process.env.UPLOAD_DIR))
 
 app.use((req, res) => {
   res.status(404).json({ status: "error", code: 404, message: "Not found" });
