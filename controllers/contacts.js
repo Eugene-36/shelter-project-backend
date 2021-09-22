@@ -1,5 +1,19 @@
 const Contacts = require("../repositories/contacts");
+
 const getAll = async (req, res, next) => {
+  try {
+    const all = await Contacts.getAll();
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+      data: all,
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const getAnimals = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { docs: contacts, ...rest } = await Contacts.listContacts(
