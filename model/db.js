@@ -1,36 +1,21 @@
-const mongoose = require("mongoose");
+const { MongoClient } = require("mongodb");
 require("dotenv").config();
-let uriDb = null;
-if (process.env.NODE_ENV === "test") {
-  uriDb = process.env.URI_DB_TEST;
-} else {
-  uriDb = process.env.URI_DB;
-}
+const uriDb = process.env.URI_DB;
 
-const db = mongoose.connect(uriDb, {
+const db = MongoClient.connect(uriDb, {
+  maxPoolSize: 50,
+  wtimeoutMS: 2500,
   useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-  poolSize: 5,
+}).catch((err) => {
+  console.error(err.stack);
+  process.exit(1);
 });
 
-if (process.env.NODE_ENV !== "test") {
-  mongoose.connection.on("connected", () => {
-    console.log(`Connection open ${uriDb}`);
-  });
-  mongoose.connection.on("error", (e) => {
-    console.log(`Error mongoose connection ${e.message}`);
-  });
-  mongoose.connection.on("disconnected", (e) => {
-    console.log(`Mongoose disconnection`);
-  });
-}
 process.on("SIGINT", async () => {
-  mongoose.connection.close(() => {
-    console.log("connection to DB terminated");
-    process.exit(1);
-  });
+  const client = await db;
+  client.close();
+  console.log("Connection to DB terminated");
+  process.exit(1);
 });
 
 module.exports = db;
