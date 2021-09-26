@@ -1,5 +1,4 @@
 const db = require("./db");
-const { ObjectId } = require("mongodb");
 
 const getCollection = async (db, name) => {
   const client = await db;
